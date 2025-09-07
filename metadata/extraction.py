@@ -19,12 +19,15 @@ class Extraction():
         self.run()
     
     def run(self):
-        for file_name in os.listdir(self.root_folder):
-            json_result = self.create_json_metadata(file_name)
-            json_result["path"] = f'{self.root_folder}/{file_name}'
-            response = self.publish_to_kafka(json_result)
-            return response
-            # break
+        try:
+            for file_name in os.listdir(self.root_folder):
+                json_result = self.create_json_metadata(file_name)
+                json_result["path"] = f'{self.root_folder}/{file_name}'
+                self.publish_to_kafka(json_result)
+        except Exception as e:
+            print("Error: ", str(e))
+            return {"Error: ", str(e)}
+ 
            
     def create_json_metadata(self, file_name):
         meta_data = os.stat(f'{self.root_folder}/{file_name}')
@@ -32,7 +35,7 @@ class Extraction():
             "metadata": {
                 "name" : file_name,
                 "size": meta_data.st_size,
-                "creation_date": datetime.fromtimestamp(meta_data.st_ctime)
+                "creation_date": str(datetime.fromtimestamp(meta_data.st_ctime))
             }
         }
         return json_result
