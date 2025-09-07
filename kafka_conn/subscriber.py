@@ -14,9 +14,11 @@ class Subscriber():
         )
 
     def get_consumer_event(self):
-        data = self.conn.poll(timeout_ms=5000, max_records=1)
-        list_data = []
-        for record in data.values():
-            list_data.extend(record)
-        return list_data[0]
+        while True:
+            data = self.conn.poll(timeout_ms=5000, max_records=10)
+            list_data = []
+            for record in data.values():
+                list_data.extend(record)
+            if list_data:
+                return list_data
 

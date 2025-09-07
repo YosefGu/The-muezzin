@@ -22,7 +22,7 @@ class Extraction():
         try:
             for file_name in os.listdir(self.root_folder):
                 json_result = self.create_json_metadata(file_name)
-                json_result["path"] = f'{self.root_folder}/{file_name}'
+                json_result["metadata"]["path"] = f'{self.root_folder}\{file_name}'
                 self.publish_to_kafka(json_result)
         except Exception as e:
             print("Error: ", str(e))
