@@ -15,7 +15,8 @@ class Publisher():
         try:
             self.conn.send(topic, data)
             self.conn.flush()
-            return {"Message" : "The data was published successfully."}
+            print("Message: ", "The data was published successfully.")
+            return {"Message: " : "The data was published successfully."}
         except Exception as e:
             print("Error publishing.", str(e))
             return {"Error": str(e)}
