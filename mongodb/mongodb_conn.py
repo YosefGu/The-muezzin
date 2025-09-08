@@ -7,11 +7,10 @@ class MongodbClient():
     def __init__(self):
         self.client = MongoClient(os.getenv('MONGODB_CONN'))
         self.database = self.client['muezzin']
-        self.fs = GridFS(self.database)
+        self.fs = GridFS(self.database, collection='audio')
 
     
-    def save_data(self, file, file_name):
-        metadata = 'metadate'
-        file_id = self.fs.put(file, filename=file_name, **metadata, content_type="audio/mpeg")
-        print(f"Audio file uploaded with ID: {file_id}")
+    def save_file(self, file, unique_id):
+        file_id = self.fs.put(file, metadata={"unique_id": unique_id})
+        return {"file_id": file_id}
     
