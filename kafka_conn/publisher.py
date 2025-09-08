@@ -1,22 +1,34 @@
 from kafka import KafkaProducer
 import os
 import json
+from logger import Logger
 
+my_logger = Logger.get_logger()
 
 class Publisher():
+    _kafka_producer = None
 
-    def __init__(self):
-        self.conn = KafkaProducer(
+    def __get_kafka_publisher(cls):
+
+        if cls._kafka_producer:
+            my_logger.info("Retrive kafka producer connect successful.")
+            return cls._kafka_producer
+        
+        cls._kafka_producer = KafkaProducer(
             bootstrap_servers=os.getenv('BOOTSTRAP_SERVER'),
             value_serializer=lambda x: json.dumps(x).encode('utf-8') 
         )
+        my_logger.info("Kafka producer initially successful.")
+        return cls._kafka_producer
 
-    def publish_data(self, topic, data):
+    @classmethod
+    def publish_data(cls, topic, data):
         try:
-            self.conn.send(topic, data)
-            self.conn.flush()
-            return {"Message: " : "The data was published successfully."}
+            producer = cls.__get_kafka_publisher(cls)
+            producer.send(topic, data)
+            producer.flush()
+            my_logger.info(f"The data has been successfully published to topic: {topic}.")
         except Exception as e:
-            print("Error publishing.", str(e))
-            return {"Error": str(e)}
+           my_logger.error(f"Error publishing data to topic: {topic}\nError: {str(e)}")
+           return str(e)
             

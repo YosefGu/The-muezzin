@@ -3,7 +3,6 @@ import sys
 from pathlib import Path
 import time
 from datetime import datetime
-import os
 from dotenv import load_dotenv
 load_dotenv()
 base_root = Path(__file__).resolve().parent.parent
@@ -12,21 +11,23 @@ sys.path.append(str(base_root))
 from kafka_conn.subscriber import Subscriber
 from elastic import elastic_conn
 from mongodb.mongodb_conn import MongodbClient 
+from logger import Logger
 
+my_logger = Logger.get_logger()
 
 
 class InitialProcessing():
 
     def __init__(self):
-        self.kafka_conn = Subscriber(os.getenv('METADATA_TOPIC'))
         self.mongodb_client = MongodbClient()
         self.elastic_conn = elastic_conn
-        self.run()
+
 
     def run(self):
         try:
             self.elastic_conn.initialize()
             while True:
+                my_logger.info("Start preprocessing chunk of data (max 10 file)")
                 doc_list = []
                 data = self.pull_data_from_kafka()
                 for record in data:
@@ -37,9 +38,11 @@ class InitialProcessing():
                     self.save_data_on_mongodb(metadata['path'], unique_id)
                     doc_list.append(metadata)
                 self.save_metadata_on_elasticsearch(doc_list)
+                my_logger.info("Finish processing chunk of data")
                 time.sleep(15)        
         except Exception as e:
-            return {"Error: " : str(e)}
+            my_logger.error(f"Error ocorce: preprocessing process stopped.\nError:{e}")
+            return str(e)
 
     # generaite unique id using file metadata
     def generate_unique_id(self, metadata):
@@ -57,7 +60,7 @@ class InitialProcessing():
         return metadata
     
     def pull_data_from_kafka(self):
-        return self.kafka_conn.get_consumer_event()
+        return Subscriber.get_consumer_event()
 
     def save_metadata_on_elasticsearch(self, doc_list):
         self.elastic_conn.insert_data(doc_list)
@@ -74,4 +77,4 @@ class InitialProcessing():
 
 
 if __name__ == "__main__":
-    InitialProcessing()
+    InitialProcessing().run()
