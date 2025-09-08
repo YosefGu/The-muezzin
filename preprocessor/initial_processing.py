@@ -39,7 +39,6 @@ class InitialProcessing():
                 self.save_metadata_on_elasticsearch(doc_list)
                 time.sleep(15)        
         except Exception as e:
-            print("Error: ", str(e))
             return {"Error: " : str(e)}
 
     # generaite unique id using file metadata
