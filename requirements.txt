@@ -2,3 +2,5 @@ dotenv==0.9.9
 kafka-python==2.2.15
 elasticsearch==8.15.1
 pymongo==4.14.1
+SpeechRecognition==3.14.3
+pydub==0.25.1
