@@ -32,7 +32,7 @@ class Subscriber():
                 for record in data.values():
                     list_data.extend(record)
                 if list_data:
-                    my_logger.info(f"Data pulled successful.")
+                    my_logger.info(f"The data was successfully pulled from Kafka.")
                     return list_data
         except Exception as e:
             my_logger.error(f"Error pulling data from kafka.\nError: {str(e)}")

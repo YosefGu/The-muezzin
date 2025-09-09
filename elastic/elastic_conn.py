@@ -57,4 +57,27 @@ def insert_data(doc_list):
     ]
     helpers.bulk(es, actions)
     es.indices.refresh(index=index_name) 
-    my_logger.info("Data inserted successfully")
+    my_logger.info("Metedate saved to elasticsearch successfully")
+
+
+def update_doc_adding_text(doc_id, text):
+    query = {
+        "script": { 
+            "source" : "ctx._source.text = params['text']",
+            "params": {
+                "text": text
+            },
+            "lang": "painless"
+        },
+        "query" : {"term" : {"unique_id" : doc_id}},   
+    }
+    response = es.update_by_query(
+        index=index_name,
+        body=query,
+        wait_for_completion=True
+    )
+    if response['updated'] > 0:
+        my_logger.info("Elasticsearch doc successfully updated.")
+    else:
+        my_logger.error(f"Error updating elasticsearch doc.\nResponse:{response}")
+
