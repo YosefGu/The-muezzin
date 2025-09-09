@@ -16,7 +16,7 @@ class MongodbClient():
     def save_file(self, file, unique_id):
         try:
             file_id = self.fs.put(file, metadata={"unique_id": unique_id})
-            my_logger.info("Data saved successfully.")
+            my_logger.info("The file was successfully saved to the MongoDB server.")
             return {"file_id": file_id}
         except Exception as e:
             my_logger.error(f"Error saving data to mongodb.\nError:{e}")
