@@ -31,6 +31,8 @@ class InitialProcessing():
                 my_logger.info("Start preprocessing chunk of data (max 10 file)")
                 doc_list = []
                 data = self.pull_data_from_kafka()
+                self.add_mapping_text_field()
+
                 for record in data:
                     metadata = record.value['metadata']
                     metadata = self.convert_string_to_datetime(metadata)
@@ -40,11 +42,10 @@ class InitialProcessing():
                     file = self.read_file(metadata['path'])
                     self.save_file_in_mongodb(file, unique_id)
                     doc_list.append(metadata)
-                    
 
                 self.save_metadata_on_elasticsearch(doc_list)
                 text_dict = self.transcriber(doc_list)
-                self.update_docs_on_elasticsearch(text_dict)
+                self.add_text_to_elasticsearch(text_dict)
 
                 my_logger.info("Finish processing chunk of data")
                 time.sleep(15)        
@@ -70,6 +71,12 @@ class InitialProcessing():
     def pull_data_from_kafka(self):
         return Subscriber.get_consumer_event()
 
+    def add_mapping_text_field(self):
+        new_field = {
+            "text" : {"type" : "text"}
+        }
+        elastic_conn.add_mapping(new_field)
+
     def save_metadata_on_elasticsearch(self, doc_list):
         self.elastic_conn.insert_data(doc_list)
 
@@ -77,7 +84,7 @@ class InitialProcessing():
         dict_data = {}
         for doc in doc_lst:
             text = ConvertAudio.speech_to_text(doc['path'])
-            dict_data[doc['unique_id']] = {"text" : text}
+            dict_data[doc['unique_id']] =  text
         return dict_data
 
     def read_file(self, path):
@@ -92,9 +99,9 @@ class InitialProcessing():
     def save_file_in_mongodb(self, file, unique_id):
         self.mongodb_client.save_file(file, unique_id)
         
-    def update_docs_on_elasticsearch(self, text_dict):
+    def add_text_to_elasticsearch(self, text_dict):
         for doc_id, text in text_dict.items():
-            self.elastic_conn.update_doc_adding_text(doc_id, text)
+            self.elastic_conn.update_doc_with_text(doc_id, text)
          
 
 
