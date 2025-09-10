@@ -135,20 +135,7 @@ class Classifier():
                 doc['bds_threat_level'] = 'medium'
 
         return docs_to_update
-
-    def update_docs(self, docs):
-        for id, data in docs.items():
-            elastic_conn.update_doc(id, data)
-
-    def get_all(self):
-        query = {
-            "query" : {"match_all" : {}},
-            "size" : 50,
-            
-        }
-        response = elastic_conn.search_by_custom_query(query)
-        return response
     
-    
+
 if __name__ == "__main__":
     Classifier().activate_classification()
