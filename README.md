@@ -37,3 +37,32 @@ Preprocessing - manages all operations and uses the various classes as needed
 4) Saves the text content to Elastic
 
 A script folder containing executable files for each container we have uploaded.
+
+
+Stage 4 Classification
+Goal - classify documents according to text data and words identified as suspicious.
+The classification and scoring process was performed using ElasticSearch
+
+Steps
+1) Decrypt encrypted strings
+2) Divide into words and word combinations - stored as different variables in 
+    the state of the class instance.
+3) Add relevant fields to the ElasticSearch index mapping
+4) Add initial data for all documents in the index
+5) Pull the documents from Elastic - 
+    a special query that gives a score for each document according to the percentage of text matching the attached words. 
+    Only documents that contain at least one word of the requested words - 
+    will be returned. 
+    Everything else will be aligned with the initial conditions we defined earlier, 
+    they do not pose a danger at all.
+6) Go through the documents we received - 
+    define the score for each document according to the 
+    Elastic calculation (a special formula is used to give a 
+    match score to the words we searched for)
+7) Calculate the average score for all selected documents
+8) Define the threat according to the average - 
+    any score that exceeds the average is defined as a high threat, 
+    what is below the average is defined as a medium threat.
+9) Update the data in Elastic - 
+    update a large amount of data at 
+    once using the - helpers.bulk function.
